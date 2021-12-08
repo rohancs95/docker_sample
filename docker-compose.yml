@@ -1,0 +1,32 @@
+version: "3.8"
+services:
+  nginx:
+    image: rohancs95/nginx_node 
+    ports:
+      - "80:80"
+    depends_on:
+      - node-app  
+    deploy:
+      placement:
+        constraints: [node.role == manager]
+    networks:
+      - balance
+  node-app:
+    image: rohancs95/test_nodeapp
+    networks:
+    - balance
+    ports:
+    - 8082:8082 
+    deploy:
+     replicas: 3
+     restart_policy:
+       max_attempts: 3
+       condition: on-failure       
+     update_config:
+       parallelism: 3
+       delay: 10s
+    restart: unless-stopped
+networks:
+  balance:
+    name: balance
+    driver: overlay
